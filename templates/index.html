@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELVOURE | House of Fragrance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f9f7f2; font-family: 'Montserrat', sans-serif; color: #1a1a1a; }
+        .navbar-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem; letter-spacing: 8px; }
+        .perfume-card { background: white; border: none; padding: 20px; transition: 0.4s; text-align: center; }
+        .perfume-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.05); transform: translateY(-5px); }
+        .price-tag { color: #c5a059; font-weight: bold; font-size: 1.1rem; }
+        .size-tag { font-size: 0.8rem; color: #888; margin-left: 5px; }
+        .btn-elvoure { background-color: #1a1a1a; color: white; border-radius: 0; padding: 10px 20px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; width: 100%; }
+        .btn-elvoure:hover { background-color: #c5a059; color: white; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white py-4 mb-5 shadow-sm">
+    <div class="container justify-content-center">
+        <a class="navbar-brand text-dark" href="#">ELVOURE</a>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row">
+        {% for p in products %}
+        <div class="col-md-4 mb-4">
+            <div class="perfume-card">
+                <img src="{{ url_for('static', filename=p.image) }}" class="img-fluid mb-3" alt="{{ p.name }}" onerror="this.src='https://via.placeholder.com/300x400?text=ELVOURE+Bottle'">
+                <h5>{{ p.name }}</h5>
+                <p class="text-muted small px-2">{{ p.description }}</p>
+                <p class="price-tag">
+                    {{ p.price }} BDT <span class="size-tag">({{ p.size }})</span>
+                </p>
+                <a href="https://wa.me/8801723552363?text=I want to order {{ p.name }} ({{ p.size }})" class="btn btn-elvoure">Order Now</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>
