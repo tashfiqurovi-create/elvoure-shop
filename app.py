@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -33,7 +33,16 @@ perfumes = [
 @app.route('/')
 def home():
     return render_template('index.html', products=perfumes)
-
+@app.route('/search')
+def search():
+    # This gets the word someone typed into the search bar
+    query = request.args.get('query', '').lower()
+    
+    # This filters your perfume list by name
+    filtered_products = [p for p in perfumes if query in p['name'].lower()]
+    
+    # This reloads the page showing only the matching perfumes
+    return render_template('index.html', products=filtered_products)
 import os
 
 if __name__ == '__main__':
