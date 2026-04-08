@@ -26,6 +26,16 @@
     </div>
 </nav>
 
+<div class="container mb-4">
+    <form action="/search" method="get" class="d-flex justify-content-center">
+        <input type="text" name="query" placeholder="Search for a scent..." class="form-control w-50" style="border-radius: 0; border: 1px solid #1a1a1a;">
+        <button type="submit" class="btn btn-dark" style="border-radius: 0; background-color: #1a1a1a;">Search</button>
+    </form>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+    ...
 <div class="container mb-5">
     <div class="row">
         {% for p in products %}
