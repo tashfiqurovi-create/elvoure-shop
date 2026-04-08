@@ -1,0 +1,38 @@
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+# Modern brands use emotional descriptions
+perfumes = [
+    {
+        "id": 1,
+        "name": "Vampire Blood",
+        "price": "250",
+        "size": "15ml",
+        "description": "Top Notes: Bergamot, Sweet Strawberry, Blood-Red BerriesMiddle Notes: Midnight Blooming Jasmine, Red BerriesBase Notes: Dark Plum, Black Musk, Green Leaves",
+        "image": "vampire_blood.webp" # Make sure this is in your static folder!
+    },
+    {
+        "id": 2,
+        "name": "Hawas Ice",
+        "price": "250",
+        "size": "15ml",
+        "description": "Top Notes: Frozen Apple, Italian Bergamot, Italian Lemon, Star AniseMiddle Notes: Orange Blossom, Plum, CardamomBase Notes: Moss, Driftwood, Amber, Musk",
+        "image": "hawas_ice.webp"
+    },
+    {
+        "id": 3,
+        "name": "Dior Sauvage",
+        "price": "250",
+        "size": "15ml",
+        "description": "Top Notes: Calabrian BergamotMiddle Notes: Sichuan Pepper, Lavender, Star Anise, NutmegBase Notes: Ambroxan, Papua New Guinean Vanilla ",
+        "image": "dior_sauvage.jfif"
+    }
+]
+
+@app.route('/')
+def home():
+    return render_template('index.html', products=perfumes)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
