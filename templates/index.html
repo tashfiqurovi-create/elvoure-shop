@@ -44,7 +44,25 @@
                 <img src="{{ url_for('static', filename=p.image) }}" class="img-fluid mb-3" alt="{{ p.name }}" onerror="this.src='https://via.placeholder.com/300x400?text=ELVOURE+Bottle'">
                 <h5>{{ p.name }}</h5>
                 <p class="text-muted small px-2">{{ p.description }}</p>
-                <p class="price-tag">
+                <div class="mb-3">
+    <p class="price-tag mb-1">
+        <span id="price-{{ p.id }}">{{ p.price[0] }}</span> BDT
+    </p>
+    
+    <select class="form-select form-select-sm mb-3" 
+            style="border-radius: 0; border: 1px solid #1a1a1a;"
+            onchange="updateOrder('{{ p.id }}', '{{ p.name }}', this)">
+        {% for s in p.size %}
+            <option value="{{ p.price[loop.index0] }}" data-size="{{ s }}">
+                {{ s }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<a id="whatsapp-{{ p.id }}" 
+   href="https://wa.me/8801723552363?text=I want to order {{ p.name }} ({{ p.size[0] }})" 
+   class="btn btn-elvoure w-100">Order Now</a>
                     {{ p.price }} BDT <span class="size-tag">({{ p.size }})</span>
                 </p>
                 <a href="https://wa.me/8801723552363?text=I want to order {{ p.name }} ({{ p.size }})" class="btn btn-elvoure">Order Now</a>
@@ -53,6 +71,19 @@
         {% endfor %}
     </div>
 </div>
-
+<script>
+function updateOrder(id, name, selectElement) {
+    const price = selectElement.value;
+    const size = selectElement.options[selectElement.selectedIndex].getAttribute('data-size');
+    
+    // 1. This updates the BDT price on the screen
+    document.getElementById('price-' + id).innerText = price;
+    
+    // 2. This updates the WhatsApp link so it sends you the right size
+    const waLink = document.getElementById('whatsapp-' + id);
+    const message = encodeURIComponent(`I want to order ${name} (${size})`);
+    waLink.href = `https://wa.me/8801723552363?text=${message}`;
+}
+</script>
 </body>
 </html>
