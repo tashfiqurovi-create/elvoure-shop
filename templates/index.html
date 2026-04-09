@@ -10,11 +10,10 @@
     <style>
         body { background-color: #f9f7f2; font-family: 'Montserrat', sans-serif; color: #1a1a1a; }
         .navbar-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem; letter-spacing: 8px; }
-        .perfume-card { background: white; border: none; padding: 20px; transition: 0.4s; text-align: center; }
+        .perfume-card { background: white; border: none; padding: 20px; transition: 0.4s; text-align: center; height: 100%; }
         .perfume-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.05); transform: translateY(-5px); }
         .price-tag { color: #c5a059; font-weight: bold; font-size: 1.1rem; }
-        .size-tag { font-size: 0.8rem; color: #888; margin-left: 5px; }
-        .btn-elvoure { background-color: #1a1a1a; color: white; border-radius: 0; padding: 10px 20px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; width: 100%; }
+        .btn-elvoure { background-color: #1a1a1a; color: white; border-radius: 0; padding: 10px 20px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; width: 100%; text-decoration: none; display: block; }
         .btn-elvoure:hover { background-color: #c5a059; color: white; }
     </style>
 </head>
@@ -22,11 +21,11 @@
 
 <nav class="navbar navbar-light bg-white py-4 mb-5 shadow-sm">
     <div class="container justify-content-center">
-        <a class="navbar-brand text-dark" href="#">ELVOURE</a>
+        <a class="navbar-brand text-dark" href="/">ELVOURE</a>
     </div>
 </nav>
 
-<div class="container mb-4">
+<div class="container mb-5">
     <form action="/search" method="get" class="d-flex justify-content-center">
         <input type="text" name="query" placeholder="Search for a scent..." class="form-control w-50" style="border-radius: 0; border: 1px solid #1a1a1a;">
         <button type="submit" class="btn btn-dark" style="border-radius: 0; background-color: #1a1a1a;">Search</button>
@@ -35,50 +34,52 @@
 
 <div class="container mb-5">
     <div class="row">
-    ...
-<div class="container mb-5">
-    <div class="row">
         {% for p in products %}
         <div class="col-md-4 mb-4">
             <div class="perfume-card">
                 <img src="{{ url_for('static', filename=p.image) }}" class="img-fluid mb-3" alt="{{ p.name }}" onerror="this.src='https://via.placeholder.com/300x400?text=ELVOURE+Bottle'">
                 <h5>{{ p.name }}</h5>
                 <p class="text-muted small px-2">{{ p.description }}</p>
+                
                 <div class="mb-3">
-    <p class="price-tag mb-1">
-        <span id="price-{{ p.id }}">{{ p.price[0] }}</span> BDT
-    </p>
-    
-    <select class="form-select form-select-sm mb-3" 
-            style="border-radius: 0; border: 1px solid #1a1a1a;"
-            onchange="updateOrder('{{ p.id }}', '{{ p.name }}', this)">
-        {% for s in p.size %}
-            <option value="{{ p.price[loop.index0] }}" data-size="{{ s }}">
-                {{ s }}
-            </option>
-        {% endfor %}
-    </select>
-</div>
-
-<a id="whatsapp-{{ p.id }}" 
-   href="https://wa.me/8801723552363?text=I want to order {{ p.name }} ({{ p.size[0] }})" 
-   class="btn btn-elvoure w-100">Order Now</a>
+                    <p class="price-tag mb-1">
+                        <span id="price-{{ p.id }}">{{ p.price[0] }}</span> BDT
+                    </p>
                     
+                    <select class="form-select form-select-sm mb-3" 
+                            style="border-radius: 0; border: 1px solid #1a1a1a;"
+                            onchange="updateOrder('{{ p.id }}', '{{ p.name }}', this)">
+                        {% for s in p.size %}
+                            <option value="{{ p.price[loop.index0] }}" data-size="{{ s }}">
+                                {{ s }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <a id="whatsapp-{{ p.id }}" 
+                   href="https://wa.me/8801723552363?text={{ 'I want to order ' ~ p.name ~ ' (' ~ p.size[0] ~ ')' | urlencode }}" 
+                   class="btn btn-elvoure">Order Now</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
+
 <script>
 function updateOrder(id, name, selectElement) {
     const price = selectElement.value;
     const size = selectElement.options[selectElement.selectedIndex].getAttribute('data-size');
     
-    // 1. This updates the BDT price on the screen
+    // 1. Update the price shown on screen
     document.getElementById('price-' + id).innerText = price;
     
-    // 2. This updates the WhatsApp link so it sends you the right size
+    // 2. Update the WhatsApp link
     const waLink = document.getElementById('whatsapp-' + id);
     const message = encodeURIComponent(`I want to order ${name} (${size})`);
     waLink.href = `https://wa.me/8801723552363?text=${message}`;
 }
 </script>
+
 </body>
 </html>
