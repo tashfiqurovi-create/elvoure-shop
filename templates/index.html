@@ -13,15 +13,30 @@
         .perfume-card { background: white; border: none; padding: 20px; transition: 0.4s; text-align: center; height: 100%; }
         .perfume-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.05); transform: translateY(-5px); }
         .price-tag { color: #c5a059; font-weight: bold; font-size: 1.1rem; }
-        .btn-elvoure { background-color: #1a1a1a; color: white; border-radius: 0; padding: 10px 20px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; width: 100%; text-decoration: none; display: block; }
+        .btn-elvoure { background-color: #1a1a1a; color: white; border-radius: 0; padding: 10px 20px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; width: 100%; text-decoration: none; border: none; cursor: pointer; }
         .btn-elvoure:hover { background-color: #c5a059; color: white; }
+        
+        /* New Cart Styles */
+        .cart-icon-wrapper { position: relative; cursor: pointer; padding: 5px; }
+        .cart-badge { 
+            background-color: #c5a059; color: white; font-size: 0.7rem; 
+            border-radius: 50%; padding: 2px 6px; position: absolute; top: -5px; right: -5px; 
+        }
+        .modal-content { border-radius: 0; }
+        .cart-item { border-bottom: 1px solid #eee; padding: 10px 0; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-light bg-white py-4 mb-5 shadow-sm">
-    <div class="container justify-content-center">
-        <a class="navbar-brand text-dark" href="/">ELVOURE</a>
+<nav class="navbar navbar-light bg-white py-4 mb-5 shadow-sm sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div style="width: 40px;"></div> <a class="navbar-brand text-dark m-0" href="/">ELVOURE</a>
+        <div class="cart-icon-wrapper" onclick="showCart()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-bag" viewBox="0 0 16 16">
+                <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+            </svg>
+            <span class="cart-badge" id="cart-count">0</span>
+        </div>
     </div>
 </nav>
 
@@ -46,9 +61,9 @@
                         <span id="price-{{ p.id }}">{{ p.price[0] }}</span> BDT
                     </p>
                     
-                    <select class="form-select form-select-sm mb-3" 
+                    <select id="select-{{ p.id }}" class="form-select form-select-sm mb-3" 
                             style="border-radius: 0; border: 1px solid #1a1a1a;"
-                            onchange="updateOrder('{{ p.id }}', '{{ p.name }}', this)">
+                            onchange="updatePriceDisplay('{{ p.id }}', this)">
                         {% for s in p.size %}
                             <option value="{{ p.price[loop.index0] }}" data-size="{{ s }}">
                                 {{ s }}
@@ -57,29 +72,109 @@
                     </select>
                 </div>
 
-                <a id="whatsapp-{{ p.id }}" 
-                   href="https://wa.me/8801723552363?text={{ 'I want to order ' ~ p.name ~ ' (' ~ p.size[0] ~ ')' | urlencode }}" 
-                   class="btn btn-elvoure">Order Now</a>
+                <button onclick="addToCart('{{ p.id }}', '{{ p.name }}')" class="btn btn-elvoure">Add to Bag</button>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
 
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0">
+                <h5 class="modal-title font-playfair" style="font-family: 'Playfair Display', serif;">Your Shopping Bag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="cart-items-container">
+                </div>
+            <div class="modal-footer border-0 flex-column">
+                <div class="d-flex justify-content-between w-100 mb-3 px-2">
+                    <span class="fw-bold">Grand Total:</span>
+                    <span class="fw-bold text-dark" id="cart-total">0 BDT</span>
+                </div>
+                <button class="btn btn-elvoure w-100 py-3" onclick="checkout()">Checkout via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function updateOrder(id, name, selectElement) {
-    const price = selectElement.value;
-    const size = selectElement.options[selectElement.selectedIndex].getAttribute('data-size');
+let cart = [];
+
+function updatePriceDisplay(id, selectElement) {
+    document.getElementById('price-' + id).innerText = selectElement.value;
+}
+
+function addToCart(id, name) {
+    const select = document.getElementById('select-' + id);
+    const price = select.value;
+    const size = select.options[select.selectedIndex].getAttribute('data-size');
+
+    cart.push({ id, name, size, price });
+    updateCartUI();
     
-    // 1. Update the price shown on screen
-    document.getElementById('price-' + id).innerText = price;
+    // Simple visual feedback
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Added!";
+    setTimeout(() => btn.innerText = originalText, 1000);
+}
+
+function updateCartUI() {
+    document.getElementById('cart-count').innerText = cart.length;
+    const container = document.getElementById('cart-items-container');
+    let total = 0;
     
-    // 2. Update the WhatsApp link
-    const waLink = document.getElementById('whatsapp-' + id);
-    const message = encodeURIComponent(`I want to order ${name} (${size})`);
-    waLink.href = `https://wa.me/8801723552363?text=${message}`;
+    if (cart.length === 0) {
+        container.innerHTML = '<p class="text-center my-4">Your bag is empty.</p>';
+        document.getElementById('cart-total').innerText = "0 BDT";
+        return;
+    }
+
+    let html = "";
+    cart.forEach((item, index) => {
+        total += parseInt(item.price);
+        html += `
+            <div class="cart-item d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0">${item.name}</h6>
+                    <small class="text-muted">${item.size}</small>
+                </div>
+                <div class="text-end">
+                    <div>${item.price} BDT</div>
+                    <button class="btn btn-sm text-danger p-0" onclick="removeFromCart(${index})">Remove</button>
+                </div>
+            </div>`;
+    });
+    container.innerHTML = html;
+    document.getElementById('cart-total').innerText = total + " BDT";
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartUI();
+}
+
+function showCart() {
+    var myModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    myModal.show();
+}
+
+function checkout() {
+    if (cart.length === 0) return alert("Bag is empty!");
+    
+    let message = "I'd like to order:\n\n";
+    let total = 0;
+    cart.forEach((item, i) => {
+        message += `${i+1}. ${item.name} (${item.size}) - ${item.price} BDT\n`;
+        total += parseInt(item.price);
+    });
+    message += `\n*Total: ${total} BDT*`;
+    
+    window.open(`https://wa.me/8801723552363?text=${encodeURIComponent(message)}`, '_blank');
 }
 </script>
-
 </body>
 </html>
